@@ -23,10 +23,16 @@ import model.User;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;;
-public class loginService extends HttpServlet {
+import net.sf.json.JSONObject;
+
+//根据省市县查询codeid
+public class cityService extends HttpServlet {
 
 	private String sqlqurey;
 	private Connection conn;
@@ -37,27 +43,19 @@ public class loginService extends HttpServlet {
 	private PreparedStatement pstm = null;
 	private static final long serialVersionUID = 1L;
 
+	/* 定义数组大小 */
+	private static int COUNT = 40;
+
 	/**
 	 * @param args
 	 */
-	public loginService() {
+	public cityService() {
 		super();
 	}
 
-	private void print(String message) {
-	    PrintWriter out = null;
-	    try {
-	    out = new PrintWriter(new FileOutputStream("D:\\FFOutput\\d:log.txt", true));
-	    out.println(message);
-	    out.close();
-	    } catch (FileNotFoundException e){
-	    e.printStackTrace();
-	    }
-	   }
-	
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		
+		doPost(request, response);
 	}
 
 	public void Json() {
@@ -91,25 +89,27 @@ public class loginService extends HttpServlet {
 		}
 	}
 
-	private JSONObject json(HttpServletRequest request) throws UnsupportedEncodingException {
-		//解析Request中的body内容
+	private JSONObject json(HttpServletRequest request)
+			throws UnsupportedEncodingException {
+		// 解析Request中的body内容
 		String length = request.getHeader("content-length");
-		 
-        byte[] buffer = new byte[Integer.parseInt(length)];
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
- 
-        try {
-            ServletInputStream stream = request.getInputStream();
-            int len = stream.read(buffer);
-            bos.write(buffer, 0, len);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String bodyDate = new String(bos.toByteArray(), "UTF-8");
-        JSONObject jsonObject = JSONObject.fromObject(bodyDate);
-        return jsonObject;
-		
+
+		byte[] buffer = new byte[Integer.parseInt(length)];
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+		try {
+			ServletInputStream stream = request.getInputStream();
+			int len = stream.read(buffer);
+			bos.write(buffer, 0, len);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String bodyDate = new String(bos.toByteArray(), "UTF-8");
+		JSONObject jsonObject = JSONObject.fromObject(bodyDate);
+		return jsonObject;
+
 	}
+
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		JSONObject jsonObject = json(request);
@@ -119,7 +119,14 @@ public class loginService extends HttpServlet {
 			stm = (Statement) conn.createStatement(
 					ResultSet.TYPE_SCROLL_INSENSITIVE,
 					ResultSet.CONCUR_READ_ONLY);
-			sqlqurey = "select * from t1user where username = '"+jsonObject.get("username")+"' and paswd = '"+jsonObject.get("password")+"' ";// 查询表语句
+			sqlqurey = "select codeid from t5citys where city1 = '"
+					+jsonObject.get("provinceSelected")
+					+"' and city2 = '"
+					+jsonObject.get("citiesSelected")
+					+"' and city3 = '"
+					+jsonObject.get("areaSelecteds")
+					+"' ";// 查询表语句
+			System.out.println(sqlqurey);
 			result = stm.executeQuery(sqlqurey);
 			response.setContentType("text/html;charset=UTF-8");// 这句必须放在下一句之前
 			outPrintWriter = response.getWriter();
@@ -133,14 +140,9 @@ public class loginService extends HttpServlet {
 //					User aUser = new User();
 //					aUser.setUsername(result.getString(1));
 //					aUser.setPaswd(result.getString(2));
-					aJson.put("id", result.getString("id"));//订购区域
-					aJson.put("username", result.getString("username"));
-					aJson.put("paswd", result.getString("paswd"));
-					aJson.put("beginDate", result.getString("servstarttime"));
-					aJson.put("endDate", result.getString("servendtime"));
-					aJson.put("producttype", result.getString("producttype"));
-					aJson.put("locno", result.getString("locno"));//订购区域
+					aJson.put("codeid", result.getString("codeid"));//订购区域
 					aJson.put("result", "success");
+					System.out.println(aJson.toString());
 					outPrintWriter.write(aJson.toString());
 				}
 			}
@@ -148,7 +150,6 @@ public class loginService extends HttpServlet {
 				aJson.put("result", "fail");
 				outPrintWriter.write(aJson.toString());
 			}
-			System.out.println(aJson.toString());
 			destroy();
 		} catch (InstantiationException e) {
 			e.printStackTrace();
@@ -162,6 +163,5 @@ public class loginService extends HttpServlet {
 		outPrintWriter.flush();
 		outPrintWriter.close();
 	}
-
 }
 // </span>

@@ -23,10 +23,16 @@ import model.User;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;;
-public class loginService extends HttpServlet {
+import net.sf.json.JSONObject;
+
+;
+public class updateUserInfoService extends HttpServlet {
 
 	private String sqlqurey;
 	private Connection conn;
@@ -37,27 +43,19 @@ public class loginService extends HttpServlet {
 	private PreparedStatement pstm = null;
 	private static final long serialVersionUID = 1L;
 
+	/* 定义数组大小 */
+	private static int COUNT = 40;
+
 	/**
 	 * @param args
 	 */
-	public loginService() {
+	public updateUserInfoService() {
 		super();
 	}
 
-	private void print(String message) {
-	    PrintWriter out = null;
-	    try {
-	    out = new PrintWriter(new FileOutputStream("D:\\FFOutput\\d:log.txt", true));
-	    out.println(message);
-	    out.close();
-	    } catch (FileNotFoundException e){
-	    e.printStackTrace();
-	    }
-	   }
-	
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		
+		doPost(request, response);
 	}
 
 	public void Json() {
@@ -91,64 +89,74 @@ public class loginService extends HttpServlet {
 		}
 	}
 
-	private JSONObject json(HttpServletRequest request) throws UnsupportedEncodingException {
-		//解析Request中的body内容
+	private JSONObject json(HttpServletRequest request)
+			throws UnsupportedEncodingException {
+		// 解析Request中的body内容
 		String length = request.getHeader("content-length");
-		 
-        byte[] buffer = new byte[Integer.parseInt(length)];
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
- 
-        try {
-            ServletInputStream stream = request.getInputStream();
-            int len = stream.read(buffer);
-            bos.write(buffer, 0, len);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String bodyDate = new String(bos.toByteArray(), "UTF-8");
-        JSONObject jsonObject = JSONObject.fromObject(bodyDate);
-        return jsonObject;
-		
+
+		byte[] buffer = new byte[Integer.parseInt(length)];
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+		try {
+			ServletInputStream stream = request.getInputStream();
+			int len = stream.read(buffer);
+			bos.write(buffer, 0, len);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String bodyDate = new String(bos.toByteArray(), "UTF-8");
+		JSONObject jsonObject = JSONObject.fromObject(bodyDate);
+		return jsonObject;
+
 	}
+
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		JSONObject jsonObject = json(request);
 		try {
 			Class.forName("org.postgresql.Driver").newInstance();
 			conn = (Connection) DriverManager.getConnection("jdbc:postgresql://10.2.3.222:5432/ars?currentSchema=public", "postgres", "csuduc");
-			stm = (Statement) conn.createStatement(
-					ResultSet.TYPE_SCROLL_INSENSITIVE,
-					ResultSet.CONCUR_READ_ONLY);
-			sqlqurey = "select * from t1user where username = '"+jsonObject.get("username")+"' and paswd = '"+jsonObject.get("password")+"' ";// 查询表语句
-			result = stm.executeQuery(sqlqurey);
 			response.setContentType("text/html;charset=UTF-8");// 这句必须放在下一句之前
 			outPrintWriter = response.getWriter();
 			JSONObject aJson = new JSONObject(); // 对象{}
-			resultNum = 0;
-			if (result != null) {// 下面用到servlet
-				while (result.next()) {// 从mysql选取数据
-					resultNum ++;
-					// 获得客户端发来的参数信息
-					//对象序列化为json串
-//					User aUser = new User();
-//					aUser.setUsername(result.getString(1));
-//					aUser.setPaswd(result.getString(2));
-					aJson.put("id", result.getString("id"));//订购区域
-					aJson.put("username", result.getString("username"));
-					aJson.put("paswd", result.getString("paswd"));
-					aJson.put("beginDate", result.getString("servstarttime"));
-					aJson.put("endDate", result.getString("servendtime"));
-					aJson.put("producttype", result.getString("producttype"));
-					aJson.put("locno", result.getString("locno"));//订购区域
-					aJson.put("result", "success");
-					outPrintWriter.write(aJson.toString());
-				}
+			stm = (Statement) conn.createStatement(
+					ResultSet.TYPE_SCROLL_INSENSITIVE,
+					ResultSet.CONCUR_READ_ONLY);
+			boolean ifDouHao = false;//判断拼接时是否需要逗号
+			StringBuffer stringBuffer = new StringBuffer("update t1user set ");
+			if(jsonObject.has("paswd")){
+				stringBuffer.append(" paswd = '"+jsonObject.get("paswd")+"' ");
+				ifDouHao = true;
 			}
-			if(resultNum == 0){//查询结果为空，返回fail
+			if(jsonObject.has("producttype")){
+				if(ifDouHao)
+					stringBuffer.append(",");
+				stringBuffer.append(" producttype = '"+jsonObject.get("producttype")+"' ");
+				ifDouHao = true;
+			}
+			if(jsonObject.has("beginDate")){
+				if(ifDouHao)
+					stringBuffer.append(",");
+				stringBuffer.append(" servstarttime = '"+jsonObject.get("beginDate")+"' ");
+				ifDouHao = true;
+			}
+			if(jsonObject.has("endDate")){
+				if(ifDouHao)
+					stringBuffer.append(",");
+				stringBuffer.append(" servendtime = '"+jsonObject.get("endDate")+"' ");
+				ifDouHao = true;
+			}
+			stringBuffer.append(" where id = "+jsonObject.get("id"));// 查询表语句
+			sqlqurey = stringBuffer.toString();
+			System.out.println(sqlqurey);
+			if(stm.executeUpdate(sqlqurey)==1)
+			{
+				aJson.put("result", "success");
+			}
+			else {
 				aJson.put("result", "fail");
-				outPrintWriter.write(aJson.toString());
 			}
-			System.out.println(aJson.toString());
+			outPrintWriter.write(aJson.toString());
 			destroy();
 		} catch (InstantiationException e) {
 			e.printStackTrace();
@@ -162,6 +170,5 @@ public class loginService extends HttpServlet {
 		outPrintWriter.flush();
 		outPrintWriter.close();
 	}
-
 }
 // </span>

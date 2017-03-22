@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.map.HashedMap;
+
 import model.User;
 
 import java.sql.Connection;
@@ -27,12 +29,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-;
-public class registerService extends HttpServlet {
+//根据codeid查询省市县
+public class cityInfoService extends HttpServlet {
 
 	private String sqlqurey;
 	private Connection conn;
@@ -49,7 +52,7 @@ public class registerService extends HttpServlet {
 	/**
 	 * @param args
 	 */
-	public registerService() {
+	public cityInfoService() {
 		super();
 	}
 
@@ -112,97 +115,75 @@ public class registerService extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
+		
 		JSONObject jsonObject = json(request);
+		response.setContentType("text/html;charset=UTF-8");// 这句必须放在下一句之前
+		outPrintWriter = response.getWriter();
+		String[] strings = jsonObject.get("codeid").toString().split("/");
+		
+		ArrayList<ArrayList> data = new ArrayList<ArrayList>();
+		JSONObject aJson = new JSONObject(); // 对象{}
 		try {
-			/*Class.forName("org.postgresql.Driver").newInstance();
-			conn = (Connection) DriverManager
-					.getConnection(
-							"jdbc:postgresql://10.2.3.222:5432/ars?currentSchema=public",
-							"postgres", "csuduc");*/
 			Class.forName("org.postgresql.Driver").newInstance();
 			conn = (Connection) DriverManager.getConnection("jdbc:postgresql://10.2.3.222:5432/ars?currentSchema=public", "postgres", "csuduc");
 			stm = (Statement) conn.createStatement(
 					ResultSet.TYPE_SCROLL_INSENSITIVE,
 					ResultSet.CONCUR_READ_ONLY);
-			// String[] cityCodeArray = new String[COUNT];
-			// ArrayList aList=new ArrayList();
-//			String cityString = "";
-//			sqlqurey = "select codeid from t5citys where city1='"
-//					+ jsonObject.getString("provinceSelected")
-//					+ "' and city2='" + jsonObject.getString("citiesSelected")
-//					+ "' and city3='" + jsonObject.getString("areaSelecteds")
-//					+ "' ";
-//			ResultSet city = stm.executeQuery(sqlqurey);
-//
-//			ResultSetMetaData m = city.getMetaData();
-//
-//			int columns = m.getColumnCount();
-//
-//			// 显示表格内容
-//			while (city.next()) {
-//				for (int i = 1; i <= columns; i++) {
-//					cityString += city.getString(i);
-//				}
-//			}
+			
+			for(int i=0;i<strings.length;i++)
+			{
+				ArrayList<String> subdata = new ArrayList<String>();
+				System.out.println(subdata.toString());
+				/*sqlqurey = "select * from t6order where codeid = '"
+						+strings[i]
+						+"' and userid = '"
+						+jsonObject.getString("userid")
+						+"'";
 
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd ");
-			sqlqurey = "insert into t1user (username,paswd,producttype,servstarttime,servendtime,locno) values('"
-					+ jsonObject.getString("username")
-					+ "','"
-					+ jsonObject.getString("password")
-					+ "','"
-					+ jsonObject.getString("producttype")
-					+ "','"
-					+ jsonObject.getString("beginDate")
-					+ "','"
-					+ jsonObject.getString("endDate")
-					+ "','"
-					+ jsonObject.getString("codeidStr")
-					+ "') ";// 查询表语句
-			System.out.println(sqlqurey);
-			JSONObject aJson = new JSONObject(); // 对象{}
-			if (!stm.execute(sqlqurey)) {
-				aJson.put("result", "success");
-
-			} else {
-				aJson.put("result", "fail");
+				System.out.println(sqlqurey);
+				result = stm.executeQuery(sqlqurey);
+				
+				resultNum = 0;
+				System.out.println(result.toString());
+				if (result != null) {// 下面用到servlet
+					while (result.next()) {// 从mysql选取数据
+						resultNum ++;
+						// 获得客户端发来的参数信息
+						subdata.add(result.getString("ordername"));
+						subdata.add(result.getString("sdpath"));
+						subdata.add(result.getString("geometry"));
+					}
+				}
+				data.add(subdata);*/
+				
+				sqlqurey = "select ordername,sdpath,geometry from t6order where codeid = '"
+						+strings[i]
+						+"' and userid = '"
+						+jsonObject.getString("userid")
+						+"'";// 查询表语句
+				result = stm.executeQuery(sqlqurey);
+				System.out.println(sqlqurey);
+				resultNum = 0;
+				if (result != null) {// 下面用到servlet
+					while (result.next()) {// 从mysql选取数据
+						resultNum ++;
+						// 获得客户端发来的参数信息
+						subdata.add(result.getString("ordername"));
+						subdata.add(result.getString("sdpath"));
+						subdata.add(result.getString("geometry"));
+					}
+				}
+				data.add(subdata);
 			}
 			
-			
-			
-			// 指定返回生成的主键 
-			/*PreparedStatement pstmt = conn.prepareStatement(sqlqurey, Statement.RETURN_GENERATED_KEYS);
-			// 如果使用静态的SQL，则不需要动态插入参数 
-			pstmt.setString(1, new Date().toLocaleString()); 
-			pstmt.executeUpdate(); 
-			// 检索由于执行此 Statement 对象而创建的所有自动生成的键 
-			ResultSet result = pstmt.getGeneratedKeys(); 
-			if (result != null) {// 下面用到servlet
-				while (result.next()) {// 从mysql选取数据
-					resultNum ++;
-					// 获得客户端发来的参数信息
-					Long id = result.getLong(1); 
-					System.out.println("数据主键：" + id); 
-					aJson.put("id", id);
-					aJson.put("result", "success");
-					outPrintWriter.write(aJson.toString());
-				}
-			}*/
-			
-			/*result = stm.executeQuery(sqlqurey);
-			resultNum = 0;
-			if (result != null) {// 下面用到servlet
-				while (result.next()) {// 从mysql选取数据
-					resultNum ++;
-					// 获得客户端发来的参数信息
-					aJson.put("id", result.getString("id"));
-					aJson.put("result", "success");
-					outPrintWriter.write(aJson.toString());
-				}
-			}*/
-			response.setContentType("text/html;charset=UTF-8");// 这句必须放在下一句之前
-			outPrintWriter = response.getWriter();
+			aJson.put("data", data);
+			aJson.put("result", "success");
+			System.out.println("aJson"+aJson.toString());
 			outPrintWriter.write(aJson.toString());
+			if(resultNum == 0){//查询结果为空，返回fail
+				aJson.put("result", "fail");
+				outPrintWriter.write(aJson.toString());
+			}
 			destroy();
 		} catch (InstantiationException e) {
 			e.printStackTrace();
@@ -213,6 +194,7 @@ public class registerService extends HttpServlet {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		 
 		outPrintWriter.flush();
 		outPrintWriter.close();
 	}

@@ -21,4 +21,58 @@
 		<servlet-name>registerService</servlet-name>
 		<url-pattern>/registerService</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>cityService</servlet-name>
+		<servlet-class>AndroidWebService.cityService</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>cityService</servlet-name>
+		<url-pattern>/cityService</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>updateUserCodeIdService</servlet-name>
+		<servlet-class>AndroidWebService.updateUserCodeIdService</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>updateUserCodeIdService</servlet-name>
+		<url-pattern>/updateUserCodeIdService</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>cityInfoService</servlet-name>
+		<servlet-class>AndroidWebService.cityInfoService</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>cityInfoService</servlet-name>
+		<url-pattern>/cityInfoService</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>updateUserInfoService</servlet-name>
+		<servlet-class>AndroidWebService.updateUserInfoService</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>updateUserInfoService</servlet-name>
+		<url-pattern>/updateUserInfoService</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>areaCodeInfoService</servlet-name>
+		<servlet-class>AndroidWebService.areaCodeInfoService</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>areaCodeInfoService</servlet-name>
+		<url-pattern>/areaCodeInfoService</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>getAreaCodeInfoService</servlet-name>
+		<servlet-class>AndroidWebService.getAreaCodeInfoService</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>getAreaCodeInfoService</servlet-name>
+		<url-pattern>/getAreaCodeInfoService</url-pattern>
+	</servlet-mapping>
 </web-app>

@@ -74,7 +74,7 @@ public class webService extends HttpServlet {
 		}
 		outPrintWriter.flush();
 		outPrintWriter.close();
-
+		destroy();
 		// response.getWriter().write("link sucessfully!");
 	}
 
