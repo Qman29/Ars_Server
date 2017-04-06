@@ -114,13 +114,13 @@ public class areaCodeInfoService extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		JSONObject jsonObject = json(request);
 		try {
-			Class.forName("org.postgresql.Driver").newInstance();
+			/*Class.forName("org.postgresql.Driver").newInstance();
 			conn = (Connection) DriverManager.getConnection("jdbc:postgresql://10.2.3.222:5432/ars?currentSchema=public", "postgres", "csuduc");
 			stm = (Statement) conn.createStatement(
 					ResultSet.TYPE_SCROLL_INSENSITIVE,
-					ResultSet.CONCUR_READ_ONLY);
+					ResultSet.CONCUR_READ_ONLY);*/
 			String aString = jsonObject.getString("ordername");
-			sqlqurey = "insert into t6order (userid,codeid,sdpath,geometry,ordername) values('"
+			sqlqurey = "insert into t6order (userid,codeid,sdpath,geometry,ordername,cropkinds) values('"
 					+ jsonObject.getString("userid")
 					+ "','"
 					+ jsonObject.getString("codeid")
@@ -130,19 +130,18 @@ public class areaCodeInfoService extends HttpServlet {
 					+ jsonObject.getString("geometry")
 					+ "','"
 					+ jsonObject.getString("ordername")
+					+ "','"
+					+ jsonObject.getString("cropkinds")
 					+ "') ";// 查询表语句
-			System.out.println(sqlqurey);
-			stm.execute(sqlqurey);
+			System.out.println(getClass().getName()+sqlqurey);
+			DBUtils dbUtils = new DBUtils(sqlqurey);
+			dbUtils.pst.execute();
+			//stm.execute(sqlqurey);
 			response.setContentType("text/html;charset=UTF-8");// 这句必须放在下一句之前
 			outPrintWriter = response.getWriter();
 			JSONObject aJson = new JSONObject(); // 对象{}
+			dbUtils.close();//关闭数据库连接  
 			destroy();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

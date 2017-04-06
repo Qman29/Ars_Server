@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.map.StaticBucketMap;
+
 import model.User;
 
 import java.sql.Connection;
@@ -114,13 +116,19 @@ public class loginService extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		JSONObject jsonObject = json(request);
 		try {
-			Class.forName("org.postgresql.Driver").newInstance();
+			
+			/*Class.forName("org.postgresql.Driver").newInstance();
 			conn = (Connection) DriverManager.getConnection("jdbc:postgresql://10.2.3.222:5432/ars?currentSchema=public", "postgres", "csuduc");
 			stm = (Statement) conn.createStatement(
 					ResultSet.TYPE_SCROLL_INSENSITIVE,
 					ResultSet.CONCUR_READ_ONLY);
 			sqlqurey = "select * from t1user where username = '"+jsonObject.get("username")+"' and paswd = '"+jsonObject.get("password")+"' ";// 查询表语句
 			result = stm.executeQuery(sqlqurey);
+			*/
+			
+			String sql = sqlqurey = "select * from t1user where username = '"+jsonObject.get("username")+"' and paswd = '"+jsonObject.get("password")+"' ";// 查询表语句
+			DBUtils dbUtils = new DBUtils(sql);
+			result = dbUtils.pst.executeQuery();
 			response.setContentType("text/html;charset=UTF-8");// 这句必须放在下一句之前
 			outPrintWriter = response.getWriter();
 			JSONObject aJson = new JSONObject(); // 对象{}
@@ -149,13 +157,10 @@ public class loginService extends HttpServlet {
 				outPrintWriter.write(aJson.toString());
 			}
 			System.out.println(aJson.toString());
+			result.close();  
+			dbUtils.close();//关闭数据库连接  
 			destroy();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+		
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

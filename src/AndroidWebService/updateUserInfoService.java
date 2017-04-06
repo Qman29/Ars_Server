@@ -114,14 +114,15 @@ public class updateUserInfoService extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		JSONObject jsonObject = json(request);
 		try {
-			Class.forName("org.postgresql.Driver").newInstance();
-			conn = (Connection) DriverManager.getConnection("jdbc:postgresql://10.2.3.222:5432/ars?currentSchema=public", "postgres", "csuduc");
 			response.setContentType("text/html;charset=UTF-8");// 这句必须放在下一句之前
 			outPrintWriter = response.getWriter();
 			JSONObject aJson = new JSONObject(); // 对象{}
+			/*Class.forName("org.postgresql.Driver").newInstance();
+			conn = (Connection) DriverManager.getConnection("jdbc:postgresql://10.2.3.222:5432/ars?currentSchema=public", "postgres", "csuduc");
+			
 			stm = (Statement) conn.createStatement(
 					ResultSet.TYPE_SCROLL_INSENSITIVE,
-					ResultSet.CONCUR_READ_ONLY);
+					ResultSet.CONCUR_READ_ONLY);*/
 			boolean ifDouHao = false;//判断拼接时是否需要逗号
 			StringBuffer stringBuffer = new StringBuffer("update t1user set ");
 			if(jsonObject.has("paswd")){
@@ -148,8 +149,9 @@ public class updateUserInfoService extends HttpServlet {
 			}
 			stringBuffer.append(" where id = "+jsonObject.get("id"));// 查询表语句
 			sqlqurey = stringBuffer.toString();
-			System.out.println(sqlqurey);
-			if(stm.executeUpdate(sqlqurey)==1)
+			System.out.println(getClass().getName()+sqlqurey);
+			DBUtils dbUtils = new DBUtils(sqlqurey);
+			if(dbUtils.pst.executeUpdate()==1)
 			{
 				aJson.put("result", "success");
 			}
@@ -157,13 +159,8 @@ public class updateUserInfoService extends HttpServlet {
 				aJson.put("result", "fail");
 			}
 			outPrintWriter.write(aJson.toString());
+			dbUtils.close();//关闭数据库连接  
 			destroy();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

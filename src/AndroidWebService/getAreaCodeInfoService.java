@@ -114,18 +114,19 @@ public class getAreaCodeInfoService extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		JSONObject jsonObject = json(request);
 		try {
-			Class.forName("org.postgresql.Driver").newInstance();
+			/*Class.forName("org.postgresql.Driver").newInstance();
 			conn = (Connection) DriverManager.getConnection("jdbc:postgresql://10.2.3.222:5432/ars?currentSchema=public", "postgres", "csuduc");
 			stm = (Statement) conn.createStatement(
 					ResultSet.TYPE_SCROLL_INSENSITIVE,
-					ResultSet.CONCUR_READ_ONLY);
+					ResultSet.CONCUR_READ_ONLY);*/
 			sqlqurey = "select * from t6order where codeid = '"
 					+ jsonObject.getString("codeid")
 					+ "' and userid = '"
 					+ jsonObject.getString("userid")
 					+ "' ";// 查询表语句
-			System.out.println(sqlqurey);
-			result = stm.executeQuery(sqlqurey);
+			System.out.println(getClass().getName()+sqlqurey);
+			DBUtils dbUtils = new DBUtils(sqlqurey);
+			result = dbUtils.pst.executeQuery();
 			response.setContentType("text/html;charset=UTF-8");// 这句必须放在下一句之前
 			outPrintWriter = response.getWriter();
 			JSONObject aJson = new JSONObject(); // 对象{}
@@ -138,9 +139,8 @@ public class getAreaCodeInfoService extends HttpServlet {
 //					User aUser = new User();
 //					aUser.setUsername(result.getString(1));
 //					aUser.setPaswd(result.getString(2));
-					aJson.put("codeid", result.getString("codeid"));//订购区域
+					aJson.put("geometry", result.getString("geometry"));
 					aJson.put("result", "success");
-					System.out.println(aJson.toString());
 					outPrintWriter.write(aJson.toString());
 				}
 			}
@@ -148,12 +148,9 @@ public class getAreaCodeInfoService extends HttpServlet {
 				aJson.put("result", "fail");
 				outPrintWriter.write(aJson.toString());
 			}
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			result.close();  
+			dbUtils.close();//关闭数据库连接  
+			destroy();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

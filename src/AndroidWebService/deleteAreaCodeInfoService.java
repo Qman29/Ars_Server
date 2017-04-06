@@ -18,8 +18,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.collections.map.HashedMap;
-
 import model.User;
 
 import java.sql.Connection;
@@ -29,13 +27,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Map;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-//根据codeid查询省市县
-public class cityInfoService extends HttpServlet {
+//根据省市县查询codeid
+public class deleteAreaCodeInfoService extends HttpServlet {
 
 	private String sqlqurey;
 	private Connection conn;
@@ -52,7 +49,7 @@ public class cityInfoService extends HttpServlet {
 	/**
 	 * @param args
 	 */
-	public cityInfoService() {
+	public deleteAreaCodeInfoService() {
 		super();
 	}
 
@@ -115,15 +112,7 @@ public class cityInfoService extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		
 		JSONObject jsonObject = json(request);
-		response.setContentType("text/html;charset=UTF-8");// 这句必须放在下一句之前
-		outPrintWriter = response.getWriter();
-		String[] strings = jsonObject.get("codeid").toString().split("/");
-		
-		ArrayList<ArrayList> data = new ArrayList<ArrayList>();
-		JSONObject aJson = new JSONObject(); // 对象{}
-		DBUtils dbUtils = null;
 		try {
 			/*Class.forName("org.postgresql.Driver").newInstance();
 			conn = (Connection) DriverManager.getConnection("jdbc:postgresql://10.2.3.222:5432/ars?currentSchema=public", "postgres", "csuduc");
@@ -131,44 +120,35 @@ public class cityInfoService extends HttpServlet {
 					ResultSet.TYPE_SCROLL_INSENSITIVE,
 					ResultSet.CONCUR_READ_ONLY);
 			*/
-			for(int i=0;i<strings.length;i++)
+			sqlqurey = "update t1user set locno = '"
+					+jsonObject.get("codeidStr")
+					+"' where id = "
+					+jsonObject.get("id");// 查询表语句
+			System.out.println(getClass().getName()+sqlqurey);
+			DBUtils dbUtils = new DBUtils(sqlqurey);
+			if(dbUtils.pst.executeUpdate()==1)
 			{
-				ArrayList<String> subdata = new ArrayList<String>();
-				sqlqurey = "select ordername,sdpath,geometry,codeid from t6order where codeid = '"
-						+strings[i]
-						+"' and userid = '"
-						+jsonObject.getString("userid")
-						+"'";// 查询表语句
-				dbUtils = new DBUtils(sqlqurey);
-				result = dbUtils.pst.executeQuery();
-				resultNum = 0;
-				if (result != null) {// 下面用到servlet
-					while (result.next()) {// 从mysql选取数据
-						resultNum ++;
-						// 获得客户端发来的参数信息
-						subdata.add(result.getString("ordername"));
-						subdata.add(result.getString("sdpath"));
-						subdata.add(result.getString("geometry"));
-						subdata.add(result.getString("codeid"));
-					}
-				}
-				data.add(subdata);
+				String sqlqurey1 = "delete from t6order where userid = '"
+						+ jsonObject.getString("id")
+						+ "' and codeid = '"
+						+ jsonObject.getString("codeid")
+						+ "'";// 查询表语句
+				System.out.println(getClass().getName()+sqlqurey1);
+				DBUtils dbUtils1 = new DBUtils(sqlqurey1);
+				dbUtils1.pst.execute();
+			}
+			else {
+				
 			}
 			
-			aJson.put("data", data);
-			aJson.put("result", "success");
-			outPrintWriter.write(aJson.toString());
-			if(resultNum == 0){//查询结果为空，返回fail
-				aJson.put("result", "fail");
-				outPrintWriter.write(aJson.toString());
-			}
-			result.close();  
+			response.setContentType("text/html;charset=UTF-8");// 这句必须放在下一句之前
+			outPrintWriter = response.getWriter();
+			JSONObject aJson = new JSONObject(); // 对象{}
 			dbUtils.close();//关闭数据库连接  
 			destroy();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		 
 		outPrintWriter.flush();
 		outPrintWriter.close();
 	}

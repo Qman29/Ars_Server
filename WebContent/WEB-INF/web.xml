@@ -68,6 +68,15 @@
 	</servlet-mapping>
 	
 	<servlet>
+		<servlet-name>deleteAreaCodeInfoService</servlet-name>
+		<servlet-class>AndroidWebService.deleteAreaCodeInfoService</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>deleteAreaCodeInfoService</servlet-name>
+		<url-pattern>/deleteAreaCodeInfoService</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>getAreaCodeInfoService</servlet-name>
 		<servlet-class>AndroidWebService.getAreaCodeInfoService</servlet-class>
 	</servlet>

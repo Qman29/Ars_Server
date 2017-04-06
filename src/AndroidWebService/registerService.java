@@ -119,11 +119,11 @@ public class registerService extends HttpServlet {
 					.getConnection(
 							"jdbc:postgresql://10.2.3.222:5432/ars?currentSchema=public",
 							"postgres", "csuduc");*/
-			Class.forName("org.postgresql.Driver").newInstance();
+			/*Class.forName("org.postgresql.Driver").newInstance();
 			conn = (Connection) DriverManager.getConnection("jdbc:postgresql://10.2.3.222:5432/ars?currentSchema=public", "postgres", "csuduc");
 			stm = (Statement) conn.createStatement(
 					ResultSet.TYPE_SCROLL_INSENSITIVE,
-					ResultSet.CONCUR_READ_ONLY);
+					ResultSet.CONCUR_READ_ONLY);*/
 			// String[] cityCodeArray = new String[COUNT];
 			// ArrayList aList=new ArrayList();
 //			String cityString = "";
@@ -160,8 +160,9 @@ public class registerService extends HttpServlet {
 					+ jsonObject.getString("codeidStr")
 					+ "') ";// 查询表语句
 			System.out.println(sqlqurey);
+			DBUtils dbUtils = new DBUtils(sqlqurey);
 			JSONObject aJson = new JSONObject(); // 对象{}
-			if (!stm.execute(sqlqurey)) {
+			if (!dbUtils.pst.execute()) {
 				aJson.put("result", "success");
 
 			} else {
@@ -203,13 +204,9 @@ public class registerService extends HttpServlet {
 			response.setContentType("text/html;charset=UTF-8");// 这句必须放在下一句之前
 			outPrintWriter = response.getWriter();
 			outPrintWriter.write(aJson.toString());
+			result.close();  
+			dbUtils.close();//关闭数据库连接  
 			destroy();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
