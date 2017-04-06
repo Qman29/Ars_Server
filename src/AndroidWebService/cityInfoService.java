@@ -134,7 +134,7 @@ public class cityInfoService extends HttpServlet {
 			for(int i=0;i<strings.length;i++)
 			{
 				ArrayList<String> subdata = new ArrayList<String>();
-				sqlqurey = "select ordername,sdpath,geometry,codeid from t6order where codeid = '"
+				sqlqurey = "select ordername,sdpath,geometry,codeid,cropkinds from t6order where codeid = '"
 						+strings[i]
 						+"' and userid = '"
 						+jsonObject.getString("userid")
@@ -150,6 +150,7 @@ public class cityInfoService extends HttpServlet {
 						subdata.add(result.getString("sdpath"));
 						subdata.add(result.getString("geometry"));
 						subdata.add(result.getString("codeid"));
+						subdata.add(result.getString("cropkinds"));
 					}
 				}
 				data.add(subdata);
